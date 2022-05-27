@@ -1,0 +1,12 @@
+# 应用名称
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        namespace: public
+        group: default
+
+
