@@ -5,6 +5,8 @@ import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
  
 import java.net.InetSocketAddress;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +33,15 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
  
- 
 @Sharable
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         Logger logger = LoggerFactory.getLogger(this.getClass());
         private WebSocketServerHandshaker handshaker;
- 
+        // 存储好消息主体
+        public static ConcurrentMap<String,ChannelHandlerContext> onlineWs = new ConcurrentHashMap<>();
+        // 自定义属性 此处不可以本类为处理类而不是ws实例
+         private static ChannelHandlerContext context;
+
         protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
                 //传统的HTTP接入
                 if (msg instanceof FullHttpRequest) {
@@ -71,9 +76,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 logger.info("客户端连接," + " clientIP:" + clientIP + " hostName:" + hostName + " hostString:" + hostString + " port:" + port);
                //接收到的消息，可进行后续操作
                 String protocol = ((TextWebSocketFrame) frame).text();
-                
                 //消息返回
                 ctx.channel().write(new TextWebSocketFrame(protocol + "欢迎使用Netty WebSocket服务，现在时刻:" + new Date().toString()));
+                ChannelHandlerContext zs = onlineWs.get("/zs");
+                if (zs == null) {return;}
+                zs.channel().writeAndFlush(new TextWebSocketFrame("发给zs信息"));
         }
  
         private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
@@ -105,6 +112,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 } else {
                         //把握手消息返回给客户端
                         handshaker.handshake(ctx.channel(), req);
+                        System.out.print("\n后续验证\n");
+                        // 自己加入注册验证
+                        String uri = req.uri();
+                        System.out.print("\n连接地址"+uri+"\n");
+                        if (uri !=null && !"/".equals(uri) ) {
+                                System.out.print("socket连接成功");
+                                MyChannelHandlerPool.add(uri,ctx);
+                                onlineWs.put(uri,ctx);
+                        }else {
+                                //消息返回
+                                ctx.channel().write(new TextWebSocketFrame("socket连接路径为空"));
+                                throw new RuntimeException("socket连接路径为空");
+                        }
                 }
         }
  
@@ -134,5 +154,4 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
                 super.channelInactive(ctx);
         }
- 
 }

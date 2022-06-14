@@ -1,5 +1,6 @@
 package com.codezl.huawei02.controller;
  
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import org.springframework.beans.factory.annotation.Autowired;
  
 import io.netty.channel.ChannelInitializer;
@@ -18,6 +19,7 @@ public class SockerChannelInitializer extends ChannelInitializer<SocketChannel> 
  
         @Override
         protected void initChannel(SocketChannel socketChannel) throws Exception {
+                System.out.print("\n初始化链接"+socketChannel+"\n");
                 ChannelPipeline pipeline = socketChannel.pipeline();
                 //用于Http请求的编码或者解码
                 pipeline.addLast("http-codec", new HttpServerCodec());
@@ -27,5 +29,8 @@ public class SockerChannelInitializer extends ChannelInitializer<SocketChannel> 
                 pipeline.addLast("http-chunked", new ChunkedWriteHandler());
                 //实际处理的Handler
                 pipeline.addLast("handler", webSocketServerHandler);
+                // 路径
+                pipeline.addLast(new MyWsServerProtocolHandler("/{orderNo}"));
+        System.out.print(pipeline);
         }
 }
