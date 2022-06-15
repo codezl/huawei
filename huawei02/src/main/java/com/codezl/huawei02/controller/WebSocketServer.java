@@ -13,10 +13,12 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
- 
+import org.springframework.stereotype.Component;
+
 /**
  * @author ayue
  */
+@Component
 public class WebSocketServer {
         Logger logger = LoggerFactory.getLogger(this.getClass());
         @Autowired

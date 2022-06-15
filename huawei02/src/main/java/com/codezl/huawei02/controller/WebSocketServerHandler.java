@@ -8,6 +8,10 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  
@@ -40,7 +44,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // 存储好消息主体
         public static ConcurrentMap<String,ChannelHandlerContext> onlineWs = new ConcurrentHashMap<>();
         // 自定义属性 此处不可以本类为处理类而不是ws实例
-         private static ChannelHandlerContext context;
+        private static ChannelHandlerContext context;
+        // 还可以用这个记录和管理channel实例,在handadd
+        private static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
 
         protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
                 //传统的HTTP接入
@@ -148,10 +155,24 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
                 super.channelActive(ctx);
+                handlerAdded(ctx);
         }
  
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
                 super.channelInactive(ctx);
+                handlerRemoved(ctx);
+        }
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+                super.handlerAdded(ctx);
+                channels.add(ctx.channel());
+        }
+
+        @Override
+        public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+                super.handlerRemoved(ctx);
+                channels.remove(ctx.channel());
         }
 }
