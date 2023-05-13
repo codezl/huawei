@@ -29,6 +29,7 @@ public class WebSocketServer {
         private ChannelHandler handler = new LoggingHandler(LogLevel.INFO);
  
         public void run(int port) throws Exception {
+                new NioEventLoopGroup();
                 //创建两组线程，监听连接和工作
                 EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupNum, new DefaultThreadFactory("Server-Boss"));
                 EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupNum, new DefaultThreadFactory("Server-Worker"));
@@ -36,13 +37,14 @@ public class WebSocketServer {
                         //Netty用于启动Nio服务端的启动类
                         ServerBootstrap b = new ServerBootstrap();
                         b.group(bossGroup, workerGroup);
-                        //注册NioServerSocketChannel
+                        //注册NioServerSocketChannel,io双向通道
                         b.channel(NioServerSocketChannel.class);
                         //注册进出站日志记录
                         b.handler(handler);
                         //注册处理器
                         b.childHandler(sockerChannelInitializer);
                         Channel ch = b.bind(port).sync().channel();
+                        // 监听阻塞
                         ch.closeFuture().sync();
                 } finally {
                         bossGroup.shutdownGracefully();

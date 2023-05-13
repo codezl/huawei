@@ -36,8 +36,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
- 
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 @Sharable
+@Component
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         Logger logger = LoggerFactory.getLogger(this.getClass());
         private WebSocketServerHandshaker handshaker;

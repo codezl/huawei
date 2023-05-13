@@ -17,22 +17,22 @@ import java.util.concurrent.ConcurrentMap;
 @RequestMapping("innerInterFace")
 public class InnerInterfaceController {
 
-    private static Print print;
+    private static final Print PRINT;
 
     interface Print {
         void print(Object msg);
     }
 
     static {
-        print = System.out::print;
+        PRINT = System.out::print;
     }
 
     public static void main(String[] args) {
         ConcurrentMap<String, InnerInterface.Addtion> add = InnerInterface.getAdd();
         InnerInterface.Addtion addtion = add.get("ADD");
-        print.print(addtion.add(1,2)+"\n");
+        PRINT.print(addtion.add(1,2)+"\n");
         ConcurrentMap<String, InnerInterface.Multi> mul = InnerInterface.getMul();
         InnerInterface.Multi multi = mul.get("MUL");
-        print.print(multi.mul(2.2f,3.0f));
+        PRINT.print(multi.mul(2.2f,3.0f));
     }
 }

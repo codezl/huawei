@@ -33,7 +33,7 @@ public class HeartBeatClient {
     @Value("${netty.server.host:localhost}")
     private String host;
 
-    private SocketChannel channel;
+    private Channel channel;
 
     @PostConstruct
     public void start() throws InterruptedException {
@@ -48,7 +48,7 @@ public class HeartBeatClient {
             LOG.info("启动 Netty 成功");
         }
 
-        channel = (SocketChannel) future.channel();
+        channel =  future.channel();
     }
 
     public class CustomerHanleInitializer extends ChannelInitializer<Channel> {
